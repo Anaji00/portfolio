@@ -19,6 +19,9 @@ function App() {
     <a href="#contact" className="text-green-400 hover:underline">
       Contact
     </a>
+    <a href="#about" className="text-green-400 hover:underline">
+  About
+</a>
   </nav>
 
   {/* Email Display */}
@@ -138,6 +141,22 @@ function App() {
           </div>
         </div>
       </section>
+      {/* About Section */}
+<section id="about" className="bg-gray-900 py-16 px-6">
+  <div className="max-w-3xl mx-auto text-center space-y-6">
+    <h2 className="text-3xl font-bold text-green-400">About Me</h2>
+    <p className="text-gray-300 text-2xl">
+      I didn’t find programming—<strong>it found me</strong>. For years, I searched for direction, unsure of where my skills and passions aligned. One day, while joking around with friends by editing HTML to prank them, I stumbled into a world that just <em>clicked</em>. What started as playful curiosity quickly turned into obsession. That spark led me down a path of building websites, writing code, and eventually developing deep learning models from scratch.
+    </p>
+    <p className="text-gray-300 text-2xl">
+      I’m a Computer Science graduate who thrives at the intersection of creativity and logic. Along the way, I’ve embraced my unique mind—<strong>living with OCD, Tourette’s, and ADHD</strong>—not as obstacles, but as advantages. These traits push me to notice the smallest details, stay hyper-focused on problems that matter, and think in ways that most wouldn’t.
+    </p>
+    <p className="text-gray-300 text-2xl">
+      Whether it’s crafting sleek user interfaces or training neural networks, I bring relentless energy, empathy, and a hacker’s mindset to everything I build.
+    </p>
+  </div>
+</section>
+
 
       {/* Contact Section */}
       <section id="contact" className="bg-gray-900 py-16 px-6 mt-20">
