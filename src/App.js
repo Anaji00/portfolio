@@ -43,7 +43,7 @@ function App() {
   <img
     src="/alessiosi.jpg"
     alt="Alessio Naji-Sepasgozar"
-    className="w-80 h-80 rounded-full object-cover border-4 border-green-400 mb-6"
+    className="w-80 aspect-square rounded-full object-cover border-4 border-green-400 mb-6"
   />
         <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
           Software Engineer & Machine Learning Developer
@@ -66,7 +66,7 @@ function App() {
         {/* LinkedIn Profile Link */}
         <div className="mt-4">
           <a
-            href="https://www.linkedin.com/in/YOUR-USERNAME"
+            href="https://www.linkedin.com/in/alessio-naji-sepasgozar-923786223"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-blue-400 hover:underline text-lg"
