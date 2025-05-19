@@ -43,7 +43,7 @@ function App() {
   <img
     src="/alessiosi.jpg"
     alt="Alessio Naji-Sepasgozar"
-    className="w-70 aspect-square rounded-full object-cover border-4 border-green-400 mb-6"
+    className="w-32 sm:w-40 md:w-48 aspect-square rounded-full object-cover border-4 border-green-400 mb-6"
   />
         <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
           Software Engineer & Machine Learning Developer
