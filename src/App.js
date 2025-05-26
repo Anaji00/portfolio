@@ -86,7 +86,7 @@ function App() {
             {/* Project 1 */}
             <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2 text-white">
-                NBA Player Prediction
+               UKNOWBALL - NBA Player Predictive Models
               </h3>
               <p className="text-gray-400 text-sm">
                 A machine learning model that predicts NBA player performance
