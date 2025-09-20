@@ -7,7 +7,7 @@ function App() {
     <div className="min-h-screen bg-gray-900 text-white font-sans">
       {/* Top Header */}
 <header className="py-8 border-b border-gray-700 text-center space-y-2">
-  <h1 className="text-5xl font-extrabold tracking-tight text-green-400">
+  <h1 className="text-5xl font-extrabold tracking-tight text-green-400 focus:outline-none">
     Alessio Naji-Sepasgozar
   </h1>
 
@@ -38,7 +38,7 @@ function App() {
 
 
       {/* Hero Section */}
-      <main className="flex flex-col items-center justify-center h-[55vh] text-center px-6">
+      <main className="flex flex-col items-center justify-center h-[60vh] text-center px-6">
           {/* Profile Picture */}
   <img
     src="/alessiosi.jpg"
@@ -78,13 +78,13 @@ function App() {
       </main>
 
       {/* Projects Section */}
-      <section id="projects" className="bg-gray-800 py-16 px-6">
+      <section id="projects" className="bg-gray-800 py-10 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-green-400 mb-10">Projects</h2>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {/* Project 1 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
+            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2 text-white">
                UKNOWBALL - NBA Player Predictive Models
               </h3>
@@ -103,7 +103,7 @@ function App() {
             </div>
 
             {/* Project 2 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
+            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2 text-white">
                 FabledKnights
               </h3>
@@ -121,7 +121,7 @@ function App() {
               </a>
             </div>
            {/* Project 2.2 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
+            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2 text-white">
                 TrackApply
               </h3>
@@ -139,7 +139,7 @@ function App() {
               </a>
             </div>
             {/* Project 3 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
+            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2 text-white">
                 Music-R-Us
               </h3>
@@ -156,7 +156,7 @@ function App() {
               </a>
             </div>
             {/* Project 4.4 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
+            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2 text-white">
                 DebateAi
               </h3>
