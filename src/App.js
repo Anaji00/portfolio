@@ -31,7 +31,7 @@ function App() {
       href="mailto:your.email@example.com"
       className="hover:underline text-green-400"
     >
-      alessionaji1@yahoo.com
+      alessionaji1@gmail.com
     </a>
   </p>
 </header>
@@ -66,7 +66,7 @@ function App() {
         {/* LinkedIn Profile Link */}
         <div className="mt-4">
           <a
-            href="https://www.linkedin.com/in/alessio-naji-sepasgozar-923786223"
+            href="https://www.linkedin.com/in/alessio-naji"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-blue-400 hover:underline text-lg"
@@ -120,7 +120,7 @@ function App() {
                 View on GitHub →
               </a>
             </div>
-           {/* Project 2 */}
+           {/* Project 2.2 */}
             <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2 text-white">
                 TrackApply
@@ -148,6 +148,23 @@ function App() {
               </p>
               <a
                 href="https://github.com/Anaji00/ECommerce---Music-R-Us"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-400 text-sm mt-3 inline-block hover:underline"
+              >
+                View on GitHub →
+              </a>
+            </div>
+            {/* Project 4.4 */}
+            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 hover:shadow-lg transition">
+              <h3 className="text-xl font-semibold mb-2 text-white">
+                DebateAi
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Challenge historical figures and sharpen your skills! Debate style ChatBot built with FastAPI and React.
+              </p>
+              <a
+                href="https://github.com/Anaji00/debateai-frontend"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-green-400 text-sm mt-3 inline-block hover:underline"
