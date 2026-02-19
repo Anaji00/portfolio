@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import { FaLinkedin, FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
-import { title } from 'framer-motion/client';
+
 
 // ── Intersection Observer hook for scroll reveals ──────────────────────────
 function useReveal(threshold = 0.15) {
