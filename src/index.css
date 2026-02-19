@@ -1,6 +1,788 @@
+/* ── STEP 1: FRAMEWORK & IMPORTS ────────────────────────────── */
+/* CONCEPT: The Cascade & Load Order
+   CSS stands for Cascading Style Sheets. The order matters!
+   
+   1. @tailwind: We inject these directives first. This gives us a baseline of 
+      utility classes (like `flex`, `pt-4`, `text-center`). We put them at the top 
+      so that our custom CSS written below can OVERRIDE them if necessary.
+      
+   2. @import: This fetches external resources (Google Fonts). It's a network request.
+      We do this early so the browser knows to download the font files immediately.
+*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-html {
-  scroll-behavior: smooth;
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+/* ── STEP 2: DESIGN TOKENS (VARIABLES) ──────────────────────── */
+/* CONCEPT: CSS Custom Properties (Variables) & Scope
+   
+   SYNTAX: --variable-name: value;
+   USAGE: var(--variable-name)
+   
+   WHY: This is the "Single Source of Truth". Instead of writing #0a0a0f 
+   50 times, we write var(--bg). If we want to change the site to "Light Mode" 
+   later, we only change these hex codes here, and the whole site updates.
+   
+   SCOPE: `:root` matches the `<html>` element. Variables declared here are "global".
+   If we declared them inside `.hero`, they would only exist inside the hero section.
+   This is similar to global vs. local scope in JavaScript.
+*/
+:root {
+  --bg: #0a0a0f;
+  --bg-2: #111118;
+  --bg-3: #16161e;
+  --surface: #1c1c26;
+  --border: rgba(255, 255, 255, 0.07);
+  --accent: #7effd4;
+  --accent-2: #5b9cf6;
+  --text: #e8e8f0;
+  --muted: #6b6b82;
+  --white: #ffffff;
+  --radius: 12px;
+  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── STEP 3: GLOBAL RESETS & DEFAULTS ───────────────────────── */
+/* CONCEPT: Normalization
+   Browsers (Chrome, Safari, Firefox) have different default stylesheets. 
+   (e.g., Safari might add margin to the body, Chrome might not).
+   We override them here to ensure a consistent baseline across all devices.
+   
+   JS HOOK: `scroll-behavior: smooth` affects internal links (HTML) AND 
+   `window.scrollTo()` calls (JavaScript).
+*/
+html {scroll-behavior: smooth;}
+
+/* CONCEPT: The Box Model
+   SYNTAX: * selects ALL elements.
+   
+   WHY: By default (`content-box`), if a div is 100px wide and you add 20px padding, 
+   the total width becomes 140px (100 + 20 left + 20 right). This breaks layouts easily.
+   `border-box` forces the padding to stay INSIDE the 100px width. 
+   This makes math much easier for developers.
+*/
+*, *::before, *::after {box-sizing: border-box;}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  /* Monospace fonts are great for technical portfolios as they look like code. */
+  font-family: 'JetBrains Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── STEP 4: LAYOUT WRAPPERS ────────────────────────────────── */
+/* CONCEPT: Overflow Management
+   HTML STRUCTURE: This class usually wraps the entire React app (`<div class="portfolio">`).
+   
+   WHY: Sometimes animations or absolutely positioned elements accidentally stretch 
+   wider than the screen, causing an ugly horizontal scrollbar. `overflow-x: hidden` 
+   acts as a safety guard, cutting off anything that spills over the edge.
+*/
+.portfolio {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── STEP 5: ANIMATION STATES ───────────────────────────────── */
+/* CONCEPT: Separation of Concerns (Logic vs. Style)
+   
+   HOW IT WORKS WITH JS:
+   1. HTML/CSS: Elements start with `opacity: 0` (invisible) and pushed down.
+   2. JS: An `IntersectionObserver` in React watches these elements.
+   3. JS: When an element enters the viewport, JS adds the class "revealed".
+      e.g., `<div class="hero revealed">`
+   4. CSS: The selector `.hero.revealed` matches. The properties change.
+   5. CSS: The `transition` property interpolates the values over 0.65s.
+   
+   PERFORMANCE: We animate `opacity` and `transform` because these are handled 
+   by the GPU (Graphics Card), ensuring buttery smooth 60fps animations.
+*/
+.hero,
+.project-card,
+.skill-group,
+.about-grid {
+  /* STATE 1: Hidden & Pushed Down */
+  opacity: 0;
+  transform: translateY(28px);
+  /* The transition property tells the browser to animate changes to opacity/transform */
+  transition: opacity 0.65s var(--transition), transform 0.65s var(--transition);
+}
+
+.hero.revealed,
+.project-card.revealed,
+.skill-group.revealed,
+.about-grid.revealed {
+  /* STATE 2: Visible & In Place */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── STEP 6: NAVIGATION (POSITIONING) ───────────────────────── */
+/* CONCEPT: The Stacking Context & Fixed Positioning
+   
+   1. position: fixed; -> Takes the element OUT of the document flow. It floats 
+      above everything else and stays pinned to the screen even when scrolling.
+   2. display: flex;   -> Turns the container into a Flex Context.
+   3. justify-content: space-between; -> Distributes space between children.
+      [Logo] <----------- space -----------> [Links]
+*/
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 48px;
+  transition: background var(--transition), border-bottom var(--transition), backdrop-filter var(--transition);
+}
+
+/* CONCEPT: Conditional Classes via JS
+   JS HOOK: React listens to the `window.onscroll` event. 
+   If `window.scrollY > 50`, React adds the class `.nav-scrolled`.
+   
+   STYLE: `backdrop-filter: blur(16px)` creates the modern "frosted glass" effect.
+*/
+.nav-scrolled {
+  background: rgba(10, 10, 15, 0.88);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  padding: 12px 48px;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--white);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.nav-logo .accent {color: var(--accent);}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+}
+/* Styling for individual navigation links. */
+.nav-links a {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color var(--transition);
+}
+.nav-links a:hover {color: var(--accent);}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 4px;
+}
+.hamburger span {
+  display: block;
+  width: 22px; height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* ── STEP 7: RESPONSIVE DESIGN (MEDIA QUERIES) ──────────────── */
+/* CONCEPT: Breakpoints & Mobile Adaptation
+   SYNTAX: @media (max-width: 768px) { ... }
+   
+   STRATEGY: We used "Desktop First" styles above. This block overrides them
+   ONLY when the screen is smaller than a tablet (768px).
+   
+   JS HOOK (.nav-links.open):
+   On mobile, `.nav-links` is `display: none` (hidden).
+   When the user clicks the hamburger, JS toggles the `.open` class.
+   CSS sees `.nav-links.open` and switches it to `display: flex`.
+*/
+@media (max-width: 768px) {
+  .nav {padding: 18px 24px;}
+  .nav-scrolled {padding: 12px 24px;}
+
+  .nav-links {
+    /* On mobile, we switch from a horizontal row to a hidden vertical drawer. */
+    display: none;
+    position: fixed;
+    top: 60px; left: 0; right: 0;
+    background: rgba(10, 10, 15, 0.97);
+    flex-direction: column;
+    backdrop-filter: blur(20px);
+    align-items: center;
+    gap: 28px;
+    padding: 40 px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-links.open {display: flex;}
+  .nav-links a {font-size: 1rem;}
+}
+
+/* ── STEP 8: HERO SECTION (RELATIVE CONTEXT) ────────────────── */
+/* CONCEPT: Coordinate Systems (Relative vs Absolute)
+   
+   THE TRICK:
+   1. We set `.hero { position: relative; }`. This makes it a "reference point".
+   2. We set `.hero-bg-grid { position: absolute; inset: 0; }`.
+   
+   If we didn't set relative on the parent, the absolute child would look for the next
+   relative parent up the tree, eventually hitting the `<body>` and stretching over the whole page.
+*/
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 40px 48px 80px;
+  overflow: hidden;
+}
+
+.hero-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(126, 255, 212, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(126, 255, 212, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  /* CONCEPT: CSS Masking
+     Just like a layer mask in Photoshop. Black = Visible, Transparent = Hidden.
+     This makes the grid fade out gently at the edges. */
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 40%, transparent 100%);
+  pointer-events: none;
+}
+
+/* CONCEPT: Pseudo-elements (::before)
+   Instead of cluttering our HTML with a `<div class="glow">`, we use CSS to generate it.
+   This keeps our HTML clean. */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(126, 255, 212, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+}
+.hero-eyebrow {
+  font-size: 0.75rem;
+  color: var(--accent-2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0 0 20px;
+}
+
+/* ── STEP 9: FLUID TYPOGRAPHY ───────────────────────────────── */
+/* CONCEPT: Fluid Scaling with Clamp
+   SYNTAX: clamp(MIN, PREFERRED, MAX)
+   
+   LOGIC: The font tries to be 6% of the viewport width (6vw).
+   However, it is constrained: never smaller than 2.8rem, 
+   and never larger than 5.2rem.
+   This replaces needing 3 different media queries for font sizes.
+*/
+.hero-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  line-height: 1.0;
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
+  margin: 0 15px 50px;
+  color: var(--white);
+}
+
+.hero-typed {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin: 0 0 36px;
+  line-height: 1.6;
+}
+.typed-text { color: var(--text); font-weight: 500;}
+.cursor {
+  display: inline-block;
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+  margin-left: 1px;
+}
+
+@keyframes blink { 0%, 100% {opacity: 1;} 50% { opacity: 0;}}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+/* ── STEP 10: INTERACTIVE ELEMENTS (BUTTONS) ────────────────── */
+/* CONCEPT: Pseudo-Classes (:hover) & Transitions
+   
+   1. Default State: Defined in `.btn-primary`.
+   2. Hover State: Defined in `.btn-primary:hover`.
+   3. Transition: The bridge between them. Without `transition`, the change is instant/jerky.
+*/
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--accent);
+  color: #050508;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: none;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(126, 255, 212, 0.25);
+}
+.btn-primary.btn-full {width: 100%; justify-content: center; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.hero-social {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-social .social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.78rem;
+  transition: all 0.2s;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.hero-social .social-icon:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.hero-social .social-email {
+  color: var(--accent);
+  text-decoration: underline;
+  font-size: 0.78rem;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+.hero-social .social-email:hover {color: var(--accent);}
+/* ── STEP 11: ADVANCED DECORATION (KEYFRAMES) ───────────────── */
+/* CONCEPT: Keyframe Animations
+   Transitions go from A -> B.
+   Animations go from A -> B -> C -> A... and can loop forever.
+   
+   Here, `rotate-ring` is the name of the animation defined in `@keyframes`.
+   `12s linear infinite` means: take 12 seconds, constant speed, never stop.
+*/
+
+.hero-photo-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(126, 255, 212, 0.3);
+  animation: rotate-ring 12s linear infinite;
+  background: conic-gradient(from 0deg, transparent 70%, rgba(126, 255, 212, 0.3) 100%);
+}
+
+@keyframes rotate-ring { to { transform: rotate(360deg);}}
+.hero-photo {
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 3px solid var(--bg-3);
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column-reverse;
+    align-items: center;
+    padding: 100px 24px 60px;
+    gap: 40px;
+  }
+
+  .hero-photo {width: 140px; height: 140px;}
+  .hero-name {font-size: clamp(2.2rem, 8vw, 3.2rem);}
+}
+
+.section {
+  padding: 100px 48px;
+}
+/* CONCEPT: nth-child
+   Selects every even section (2, 4, 6) to give them a darker background. */
+.section:nth-child(even) {background: var(--bg-2);}
+.section-inner { max-width: 1100px; margin: 0 auto;}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+.section-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  opacity: 0.7;
+  font-weight: 500;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2.2rem;
+  color: var(--white);
+  letter-spacing: -0.02em;
+  padding-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .section {padding: 72px 24px;}
+  .section-title {font-size: 1.75rem;}
+}
+
+/* ── STEP 12: RESPONSIVE GRIDS ──────────────────────────────── */
+/* CONCEPT: CSS Grid vs Flexbox
+   Flexbox is 1-dimensional (rows OR columns). Grid is 2-dimensional.
+   
+   SYNTAX DEEP DIVE: `repeat(auto-fit, minmax(320px, 1fr))`
+   1. `minmax(320px, 1fr)`: Columns must be at least 320px wide.
+   2. `1fr`: If there is extra space, share it equally (fractional unit).
+   3. `auto-fit`: Fit as many of these columns as possible into the row.
+   
+   RESULT: A fully responsive grid without writing a single media query.
+*/
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition:
+     opacity 0.65s var(--transition),
+     transform 0.65s var(--transition),
+     border-color 0.25s,
+     box-shadow 0.25s;
+  cursor: pointer;
+}
+.project-card:hover {
+  border-color: rgba(126, 255, 212, 0.25);
+  box-shadow: 0 8px 40px rgba(126, 255, 212, 0.06);
+  transform: translateY(-4px) !important;
+}
+.project-card.featured {
+  border-color: rgba(126, 255, 212, 0.15);
+  background: linear-gradient(135deg, var(--surface), rgba(126, 255, 212, 0.03));
+}
+
+.card-inner {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 16px;
+}
+.card-header {display: flex; flex-direction: column; gap: 4px}
+
+.featured-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(126, 255, 212, 0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  width: fit-content;
+  margin-bottom: 8px;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--white);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.card-subtitle {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0;
+}
+.card-desc {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0;
+  flex: 1;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+}
+.tags {display: flex; flex-wrap: wrap; gap: 6px;}
+.tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--accent-2);
+  background: rgba(91, 156, 246, 0.15);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+.card-link:hover {opacity: 0.7;}
+
+/* ── SKILLS ─────────────────────────────────────────────────── */
+.skill-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.skill-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+.skill-items { display: flex; flex-wrap: wrap; gap: 8px;}
+.skill-pill {
+  font-size: 0.78rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 14px;
+  transition: border-color 0.2s, color 0.2s;
+  cursor: default;
+}
+.skill-pill:hover {
+  border-color: rgba(126, 255, 212, 0.3);
+  color: var(--accent);
+}
+
+/* ── ABOUT ──────────────────────────────────────────────────── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 60px;
+  align-items: start;
+}
+.about-text {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.about-text p {
+  font-size: 0.92rem;
+  line-height: 1.85;
+  color: var(--muted);
+  margin: 0;
+}
+.about-text strong { color: var(--text); font-weight: 500;}
+.about-text em {color: var(--accent); font-style: normal;}
+
+.about-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.about-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.stat-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+@media (max-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .about-sidebar {flex-direction: row; flex-wrap: wrap;}
+  .about-stat {flex: 1; min-width: 100px;}
+}
+
+/* ── STEP 13: FORMS & ACCESSIBILITY ─────────────────────────── */
+
+.contact-inner {max-width: 680px; margin: 0 auto;}
+.contact-sub {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: -10px 0 44px;
+}
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 600px) { .form-row {grid-template-columns: 1fr;}}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.form-field label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.form-field input,
+.form-field textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+}
+.form-field input::placeholder,
+.form-field textarea::placeholder {color: rgba(107, 107, 130, 0.6);}
+.form-field input:focus,
+.form-field textarea:focus {
+  /* CONCEPT: Accessibility & Focus States
+     When a user tabs into an input, the browser adds a default blue outline.
+     We remove that (via `outline: none` above) but we MUST replace it for accessibility.
+     Here we add a custom border color and shadow to show the user where they are typing.
+  */
+  border-color: rgba(126, 255, 212, 0.35);
+  box-shadow: 0 0 0 3px rgba(126, 255, 212, 0.06);
+}
+
+.contact-alt {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.contact-alt a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.contact-alt a:hover {opacity: 0.7;}
+
+/* ── STEP 14: FOOTER ────────────────────────────────────────── */
+.footer {
+  padding: 32px 48px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.footer p { margin: 0; font-size: 0.75rem; color: var(--muted);}
+.footer-sub { color: rgba(107, 107, 130, 0.5);}
+
+@media (max-width: 480px) {
+  .footer { padding: 24px; flex-direction: column;}
 }

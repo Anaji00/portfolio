@@ -1,252 +1,405 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
-import { FaLinkedin } from 'react-icons/fa';
+import { FaLinkedin, FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
+import { title } from 'framer-motion/client';
 
-function App() {
+// ── Intersection Observer hook for scroll reveals ──────────────────────────
+function useReveal(threshold = 0.15) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {if (entry.isIntersecting) {setVisible(true); obs.disconnect(); }}, 
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+
+  }, [threshold]);
+  return [ref, visible];
+}
+
+
+// ── Typed text animation ───────────────────────────────────────────────────
+
+function TypedText({ strings, speed = 80, pause = 1800}) {
+  const [display, setDisplayed] = useState('');
+  const [idx, setIndex] = useState(0);
+  const [typing, setTyping] = useState(true);
+  useEffect(() => {
+    const current = strings[idx % strings.length];
+    let timeout;
+    if (typing) {
+      if (display.length < current.length) {
+        timeout = setTimeout(() => setDisplayed(current.slice(0, display.length + 1)), speed);
+      } else {
+        timeout = setTimeout(() => setTyping(false), pause);
+      }
+    } else {
+      if (display.length > 0) {
+        timeout = setTimeout(() => setDisplayed(display.slice(0, -1)), speed / 2);
+      } else {
+        setIndex(i => i + 1);
+        setTyping(true);
+      }
+    }
+    return () => clearTimeout(timeout);
+
+  }, [display, typing, idx, strings, speed, pause]);
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans">
-      {/* Top Header */}
-<header className="py-8 border-b border-gray-700 text-center space-y-2">
-  <h1 className="text-5xl font-extrabold tracking-tight text-green-400 focus:outline-none">
-    Alessio Naji-Sepasgozar
-  </h1>
-
-  {/* Navigation Links */}
-  <nav className="flex justify-center gap-6 mt-2 text-lg">
-    <a href="#projects" className="text-green-400 hover:underline">
-      Projects
-    </a>
-    <a href="#contact" className="text-green-400 hover:underline">
-      Contact
-    </a>
-    <a href="#about" className="text-green-400 hover:underline">
-  About
-</a>
-  </nav>
-
-  {/* Email Display */}
-  <p className="text-gray-400 text-sm mt-2">
-    📧{" "}
-    <a
-      href="mailto:your.email@example.com"
-      className="hover:underline text-green-400"
-    >
-      alessionaji1@gmail.com
-    </a>
-  </p>
-</header>
-
-
-      {/* Hero Section */}
-      <main className="flex flex-col items-center justify-center h-[60vh] text-center px-6">
-          {/* Profile Picture */}
-  <img
-    src="/alessiosi.jpg"
-    alt="Alessio Naji-Sepasgozar"
-    className="w-32 sm:w-40 md:w-48 aspect-square rounded-full object-cover border-4 border-green-400 mb-6 mt-6"
-  />
-        <h2 className="text-3xl sm:text-4xl font-semibold mb-4 text-white">
-          Software Engineer & Machine Learning Developer
-        </h2>
-        <p className="text-lg sm:text-xl max-w-2xl text-gray-400">
-          I design, build, and deploy intelligent systems—from predictive models
-          in sports analytics to full-stack web applications.
-        </p>
-
-        {/* Download Resume Button */}
-        <div className="mt-6">
-          <a
-            href="./resume.pdf"
-            className="px-6 py-2 border border-green-400 text-green-400 hover:bg-green-500 hover:text-black font-medium rounded-full transition"
-          >
-            Download Resume
-          </a>
-        </div>
-
-        {/* LinkedIn Profile Link */}
-        <div className="mt-4">
-          <a
-            href="https://www.linkedin.com/in/alessio-naji"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-blue-400 hover:underline text-lg"
-          >
-            <FaLinkedin size={20} />
-            LinkedIn Profile
-          </a>
-        </div>
-      </main>
-
-      {/* Projects Section */}
-      <section id="projects" className="bg-gray-800 py-10 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-green-400 mb-10">Projects</h2>
-
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Project 1 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
-              <h3 className="text-xl font-semibold mb-2 text-white">
-               UKNOWBALL - NBA Player Predictive Models
-              </h3>
-              <p className="text-gray-400 text-sm">
-                A machine learning model that predicts NBA player performance
-                using XGBoost and MLP.
-              </p>
-              <a
-                href="https://github.com/Anaji00/UKNOWBALL"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-400 text-sm mt-3 inline-block hover:underline"
-              >
-                View on GitHub →
-              </a>
-            </div>
-
-            {/* Project 2 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
-              <h3 className="text-xl font-semibold mb-2 text-white">
-                FabledKnights
-              </h3>
-              <p className="text-gray-400 text-sm">
-                A 2.5D side-scrolling game built with Unity, featuring a unique
-                combat system and engaging story.
-              </p>
-              <a
-                href="https://github.com/Anaji00/FabledKnights"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-400 text-sm mt-3 inline-block hover:underline"
-              >
-                View on GitHub →
-              </a>
-            </div>
-           {/* Project 2.2 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
-              <h3 className="text-xl font-semibold mb-2 text-white">
-                TrackApply
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Full-stack job application tracker using ASP.NET Core Web API backend and Angular frontend, 
-              with JWT-based authentication, role-secured endpoints, and SQLite-backed persistence
-              </p>
-              <a
-                href="https://github.com/Anaji00/TrackApply"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-400 text-sm mt-3 inline-block hover:underline"
-              >
-                View on GitHub →
-              </a>
-            </div>
-            {/* Project 3 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
-              <h3 className="text-xl font-semibold mb-2 text-white">
-                Music-R-Us
-              </h3>
-              <p className="text-gray-400 text-sm">
-                A full-stack E-Commerce platform for music enthusiasts.
-              </p>
-              <a
-                href="https://github.com/Anaji00/ECommerce---Music-R-Us"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-400 text-sm mt-3 inline-block hover:underline"
-              >
-                View on GitHub →
-              </a>
-            </div>
-            {/* Project 4.4 */}
-            <div className="bg-gray-900 p-6 rounded-lg border border-green-700 hover:shadow-lg transition">
-              <h3 className="text-xl font-semibold mb-2 text-white">
-                DebateAi
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Challenge historical figures and sharpen your skills! Debate style ChatBot built with FastAPI and React.
-              </p>
-              <a
-                href="https://github.com/Anaji00/debateai-frontend"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-400 text-sm mt-3 inline-block hover:underline"
-              >
-                View on GitHub →
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* About Section */}
-<section id="about" className="bg-gray-900 py-16 px-6">
-  <div className="max-w-3xl mx-auto text-center space-y-6">
-    <h2 className="text-3xl font-bold text-green-400">About Me</h2>
-    <p className="text-gray-300 text-2xl">
-      I didn’t find programming—<strong>it found me</strong>. For years, I searched for direction, unsure of where my skills and passions aligned. One day, while joking around with friends by editing HTML to prank them, I stumbled into a world that just <em>clicked</em>. What started as playful curiosity quickly turned into obsession. That spark led me down a path of building websites, writing code, and eventually developing deep learning models from scratch.
-    </p>
-    <p className="text-gray-300 text-2xl">
-      I’m a Computer Science graduate who thrives at the intersection of creativity and logic. Along the way, I’ve embraced my unique mind—<strong>living with OCD, Tourette’s, and ADHD</strong>—not as obstacles, but as advantages. These traits push me to notice the smallest details, stay hyper-focused on problems that matter, and think in ways that most wouldn’t.
-    </p>
-    <p className="text-gray-300 text-2xl">
-      Whether it’s crafting sleek user interfaces or training neural networks, I bring relentless energy, empathy, and a hacker’s mindset to everything I build.
-    </p>
-  </div>
-</section>
-
-
-      {/* Contact Section */}
-      <section id="contact" className="bg-gray-900 py-16 px-6 mt-20">
-        <div className="max-w-xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-green-400 mb-8">Contact</h2>
-          <form className="space-y-6">
-            {/* Name */}
-            <div>
-              <input
-                type="text"
-                placeholder="Your Name"
-                className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <input
-                type="email"
-                placeholder="Your Email"
-                className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-
-            {/* Message */}
-            <div>
-              <textarea
-                rows="5"
-                placeholder="Your Message"
-                className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              ></textarea>
-            </div>
-
-            {/* Submit */}
-            <div>
-              <button
-                type="submit"
-                className="w-full px-6 py-3 bg-green-500 hover:bg-green-600 text-black font-semibold rounded-lg transition"
-              >
-                Send Message
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 border-t border-gray-700">
-        <div className="text-center">
-          <p className="text-gray-400 text-sm">
-            © 2025 Alessio Naji-Sepasgozar. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
+    <span className='typed-text'>
+      {display}
+      <span className='cursor'></span>
+    </span>
   );
 }
 
-export default App;
+
+// ── Projects data ──────────────────────────────────────────────────────────
+
+
+// ── Projects data ──────────────────────────────────────────────────────────
+const projects = [
+  {
+    title: 'UKNOWBALL',
+    subtitle: 'NBA Player Predictive Models',
+    description: 'ML pipeline using XGBoost + MLP to predict NBA player performance metrics. Feature-engineered from historical game data.',
+    tags: ['Python', 'XGBoost', 'PyTorch', 'Data Engineering', 'ML Pipeline'],
+    link: 'https://github.com/Anaji00/UKNOWBALL',
+    featured: true,
+  },
+  {
+    title: 'DebateAI',
+    subtitle: 'Historical Figure Chatbot',
+    description: 'FastAPI + React debate chatbot. Challenge historical figures, sharpen rhetoric. Persona-prompted LLM backend.',
+    tags: ['FastAPI', 'React', 'LLM', 'Python', 'Data Cleaning', 'CI/CD'],
+    link: 'https://github.com/Anaji00/debateai-frontend',
+    featured: true,
+  },
+  {
+    title: 'MarketMaker',
+    subtitle: 'Agentic AI Trading Signals & Market Intelligence',
+    description: 'AI-driven market signal and analysis platform that delivers real-time insights, trade alerts, and quantitative guidance across financial markets.',
+    tags: ['Trading', 'AI', 'Signals', 'Market Analysis', 'Finance Tech', 'Isolation Forest'],
+    link: 'https://github.com/Anaji00/MarketMaker',
+    featured: true,
+  },
+  {
+    title: 'functools2',
+    subtitle: 'Async LRU Cache Library for Python',
+    description:'A modern update to functools, feauturing an asyncio-aware caching library that provides TTL (time-to-live), single-flight execution, and stale-while-revalidate support to efficiently cache async function results in Python applications.',
+    tags: ['Python', 'asyncio', 'caching', 'library', 'PyPI'],
+    link: 'https://pypi.org/project/functools2/',
+    featured: false,
+  },
+  {
+  title: 'TrackApply',
+  subtitle: 'Full-Stack Job Tracker',
+  description: 'ASP.NET Core Web API + Angular frontend with JWT auth, role-secured endpoints, and SQLite persistence.',
+  tags: ['ASP.NET Core', 'Angular', 'JWT', 'SQLite', 'Full-Stack', 'REST API'],
+  link: 'https://github.com/Anaji00/TrackApply',
+  featured: false,
+  },
+  {
+    title: 'FabledKnights',
+    subtitle: '2.5D Unity Game',
+    description: 'Side-scrolling action game built in Unity with custom combat system, procedural elements, and original story.',
+    tags: ['Unity', 'C#', 'Game Design', '2.5D'],
+    link: 'https://github.com/Anaji00/FabledKnights',
+    featured: false,
+  },
+  {
+    title: 'Music-R-Us',
+    subtitle: 'E-Commerce Platform',
+    description: 'Full-stack e-commerce platform for music enthusiasts — catalog, cart, checkout, and admin dashboard.',
+    tags: ['Full-Stack', 'E-Commerce', 'Web Dev'],
+    link: 'https://github.com/Anaji00/ECommerce---Music-R-Us',
+    featured: false,
+  },
+];
+
+// ── Skills data ────────────────────────────────────────────────────────────
+const skillGroups = [
+  {
+    label: 'Languages',
+    items: ['Python', 'C#', 'JavaScript', 'TypeScript', 'SQL', 'HTML/CSS', 'Java', 'C++', 'R', 'Go', 'Rust'],
+  },
+  {
+    label: 'Frameworks',
+    items: ['React', 'Angular', 'ASP.NET Core', 'FastAPI', 'Django', 'Flask', 'PowerBI', 'Tableu'],
+  },
+  {
+    label: 'ML / Data',
+    items: ['PyTorch', 'XGBoost', 'Scikit-learn', 'Pandas', 'NumPy', 'TensorFlow', 'NLP'],
+  },
+  {
+    label: 'Concepts / Architecture',
+    items: [
+      'RESTful API Design',
+      'Authentication & Authorization (JWT, OAuth 2.0)',
+      'Caching Strategies (LRU, Redis, TTL)',
+      'Rate Limiting & Throttling',
+      'Design Patterns',
+      'Asynchronous & Concurrent Programming',
+      'Database Indexing & Query Optimization',
+      'Microservices Architecture',
+      'Dependency Injection',
+      'Model Context Protocol (MCP)',
+      'Agent Tooling & RAG Systems'
+    ],
+  },
+
+  {
+    label: 'Database / Caching Tools',
+    items: ['PostgreSQL', 'SQLite', 'MongoDB', 'Redis']
+  },
+  {
+    label: 'DevOps / Tools',
+    items: ['Git', 'Docker', 'CI/CD', 'Cloud Deployments'],
+  },
+  {
+    label: 'Certifications',
+    items: ['AWS Cloud Practitioner', 'AWS Solutions Architect - Associate', 'Microsoft Azure Fundamentals', 'Google Associate Cloud Engineer']
+  },
+  
+];
+
+// -- project card component ───────────────────────────────────────────────────
+function ProjectCard({ project, index}) {
+  const [ref, visible] = useReveal();
+  return (
+    <div 
+      ref={ref}
+      className={`project-card ${project.featured ? 'featured' : ''} ${visible ? 'revealed' : ''}`}
+      style={{ transitionDelay: `${index * 80}ms` }}
+      >
+        <div className='card-inner'>
+          <div className='card-header'>
+            {project.featured && <span className='featured-badge'>Featured</span>}
+            <h3 className='card-title'>{project.title}</h3>
+            <p className='card-subtitle'>{project.subtitle}</p>
+          </div>
+          <p className='card-desc'>{project.description}</p>
+          <div className='card-footer'>
+            <div className='tags'>
+            {project.tags.map(t=> <span key={t} className='tag'>{t}</span>)}
+          </div>
+          <a href={project.link} target='_blank' rel='noopener noreferrer' className='card-link'>
+            <FaGithub size={14} /> 
+            View Code
+          </a>
+        </div>
+      </div>
+    </div>    
+  );
+}
+
+// -- Skill Group component ───────────────────────────────────────────────────────
+
+function SkillGroup({ group, delay}) {
+  const [ref, visible] = useReveal();
+  return (
+    <div
+      ref={ref}
+      className={`skill-group ${visible ? 'revealed' : ''}`}
+      style={{ transitionDelay: `${delay}ms`}}
+      >
+        <p className={`skill-label`}>{group.label}</p>
+        <div className='skill-items'>
+          {group.items.map(s => <span key={s} className='skill-pill'>{s}</span>)}
+        </div>
+      </div>
+  );
+}
+
+
+// ── Main App ───────────────────────────────────────────────────────────────
+
+export default function App() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [heroRef, heroVisible] = useReveal(0.05);
+  const [aboutRef, aboutVisible] = useReveal();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+}, []);
+
+ return (
+    <div className="portfolio">
+      {/* ── NAV ────────────────────────────── */}
+      <nav className={`nav ${scrolled ? 'nav-scrolled' : ''}`}>
+        <a href="#top" className="nav-logo">AN<span className="accent">.</span></a>
+        <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
+          {['Projects', 'Skills', 'About', 'Contact'].map(l => (
+            <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setMenuOpen(false)}>
+              {l}
+            </a>
+          ))}
+        </div>
+        <button className='hamburger' onClick={() => setMenuOpen(m => !m)} aria-label='menu'>
+          <span /> <span /> <span />
+        </button>
+      </nav>
+
+      {/* ── HERO ────────────────────────────── */}
+      <section id="top" ref={heroRef} className={`hero ${heroVisible ? 'revealed' : ''}`}>
+        <div className='hero-bg-grid' />
+        <div className='hero-content'>
+          <p className='hero-eyebrow'>— AI Engineer & ML Developer</p>
+          <h1 className='hero-name'>Alessio <br /> Naji-Sepasgozar</h1>
+          <p className='hero-typed'>
+            I build{' '}
+            <TypedText strings={[
+              'predictive ML models.',
+              'full-stack applications.',
+              'AI Agents.',
+              'data pipelines.',
+              'you know.. thinks that matter.'
+
+            ]} />
+          </p>
+          <div className='hero-actions'>
+            <a href='./resume.pdf' className='btn-primary'>Download Resume</a>
+            <a href='#projects' className='btn-ghost'>See My Work ↓</a>
+          </div>
+          <div className='hero-social'>
+            <a href='https://www.linkedin.com/in/alessio-naji-sepasgozar/' target='_blank' rel='noopener noreferrer'>
+              <FaLinkedin size={25} />
+            </a>
+            <a href='https://github.com/Anaji00' target='_blank' rel='noopener noreferrer'>
+              <FaGithub size={25} />
+            </a>
+            <a href="mailto:alessionaji1@gmail.com">
+              alessionaji1@gmail.com
+            </a>
+          </div>
+        </div>
+        <div className='hero-photo-wrap'>
+          <div className='hero-photo-ring' />
+          <img src='/alessiosi.jpg' alt='Alessio Naji-Sepasgozar' className='hero-photo' />
+        </div>
+      </section>
+
+
+      {/* ── PROJECTS ───────────────────────── */}
+
+      <section id='projects' className='projects-section'>
+        <div className='section-inner'>
+          <div className='section-header'>
+            <span className='section-number'>01.</span>
+            <h2 className='section-title'>Projects</h2>
+          </div>
+          <div className='projects-grid'>
+            {projects.map((p, i) => <ProjectCard key={p.title} project={p} index={i} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SKILLS ──────────────────────────── */}
+      <section id='skills' className='skills-section'>
+        <div className='section-inner'>
+          <div className='section-header'>
+            <span className='section-number'>02.</span>
+            <h2 className='section-title'>Skills</h2>
+          </div>
+          <div className='skills-grid'>
+            {skillGroups.map((g, i) => <SkillGroup key={g.label} group={g} delay={i * 100} />)}
+          </div>
+        </div>
+      </section>
+      {/* ── ABOUT ME ────────────────────────── */}
+      <section id='about' className={'about-section'}>
+        <div className='section-inner'>
+          <div className='section-header'>
+            <span className='section-number'>03.</span>
+            <h2 className='section-title'>About</h2>
+          </div>
+          <div 
+            ref = {aboutRef}
+            className={`about-grid ${aboutVisible ? 'revealed' : ''}`}
+            >
+            <div className='about-text'>
+              <p>
+                I didn't find programming — <strong>it found me</strong>. For years I searched for direction, unsure where my skills and passions aligned. One day, joking around editing HTML to prank friends, something <em>clicked</em>. What started as curiosity turned into obsession: websites, then codebases, then deep learning models from scratch.
+              </p>
+              <p>
+                I'm a CS graduate who operates at the intersection of creativity and logic. I've embraced living with <strong>OCD, Tourette's, and ADHD</strong> — not as obstacles but as signal. They sharpen my focus on details others miss, sustain deep work on hard problems, and produce thinking that takes unconventional paths.
+              </p>
+              <p>
+                Whether crafting interfaces or training neural networks, I bring relentless energy, a hacker's mindset, and genuine curiosity to everything I build. 
+              </p>
+
+            </div>
+            <div className='about-sidebar'>
+              <div className='about-stat'>
+                <span className='stat-num'>5+</span>
+                <span className='stat-label'>Shipped Projects</span>
+              </div>
+              <div className='about-stat'>
+                <span className='stat-num'>ML</span>
+                <span className='stat-label'>& Full Stack</span>
+              </div>
+              <div className='about-stat'>
+                <span className='stat-num'>CS</span>
+                <span className='stat-label'>Graduate</span>
+              </div>
+            </div>
+            </div>
+        </div>
+      </section>
+      {/* ── CONTACT ─────────────────────────── */}
+      <section id='contact' className='contact-section'>
+        <div className='section-inner'>
+          <div className='section-header'>
+            <span className='section-number'>04.</span>
+            <h2 className='section-title'>Contact</h2>
+          </div>
+          <p className='contact-sub'>
+            Open to full-time roles, freelance, and interesting collaborations.
+          </p>
+          <form 
+            className='contact-form'
+            onSubmit={e => {e.preventDefault(); alert('Message Sent!'); }}
+          >
+            <div className='form-row'>
+              <div className='form-field'>
+                <label>Name</label>
+                <input type='text' placeholder='Your Name' required />
+              </div>
+              <div className='form-field'>
+                <label>Email</label>
+                <input type='email' placeholder='Your Email' required />
+              </div>
+              </div>
+            <div className='form-field'>
+              <label>Message</label>
+              <textarea rows='5' placeholder='Your Message' required />
+            </div>
+            <button type='submit' className='btn-primary btn-full'>Send Message →</button>
+            </form>
+            <div className='contact-alt'>
+              <span>Or reach me directly:</span>
+              <a href="mailto:alessionaji1@gmail.com">
+                alessionaji1@gmail.com
+              </a>
+              <a href='https://www.linkedin.com/in/alessio-naji-sepasgozar/' target='_blank' rel='noopener noreferrer'>
+                <FaLinkedin size={16} /> LinkedIn
+              </a>
+            </div>
+          </div>
+        </section>
+    
+        <footer className='footer'>
+          <p>© 2026 Alessio Naji=Sepasgozar. All rights reserved.</p>
+          <p className='footer-sub'>Built with React + Tailwind. Designed with love.</p>
+        </footer>
+        </div>
+
+  );
+}
