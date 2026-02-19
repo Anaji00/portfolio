@@ -346,7 +346,7 @@ export default function App() {
                 <span className='stat-label'>& Full Stack development</span>
               </div>
               <div className='about-stat'>
-                <span className='stat-num'>CS Graduate</span>
+                <span className='stat-num'>CS Grad</span>
                 <span className='stat-label'>Summa Cum Laude</span>
               </div>
             </div>
