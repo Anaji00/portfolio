@@ -269,7 +269,7 @@ export default function App() {
             <a href='#projects' className='btn-ghost'>See My Work ↓</a>
           </div>
           <div className='hero-social'>
-            <a href='https://www.linkedin.com/in/alessio-naji-sepasgozar/' target='_blank' rel='noopener noreferrer'>
+            <a href='https://www.linkedin.com/in/alessio-naji/' target='_blank' rel='noopener noreferrer'>
               <FaLinkedin size={25} />
             </a>
             <a href='https://github.com/Anaji00' target='_blank' rel='noopener noreferrer'>
@@ -342,12 +342,12 @@ export default function App() {
                 <span className='stat-label'>Shipped Projects</span>
               </div>
               <div className='about-stat'>
-                <span className='stat-num'>ML</span>
-                <span className='stat-label'>& Full Stack</span>
+                <span className='stat-num'>Machine Learning</span>
+                <span className='stat-label'>& Full Stack development</span>
               </div>
               <div className='about-stat'>
-                <span className='stat-num'>CS</span>
-                <span className='stat-label'>Graduate</span>
+                <span className='stat-num'>CS Graduate</span>
+                <span className='stat-label'>Summa Cum Laude</span>
               </div>
             </div>
             </div>
