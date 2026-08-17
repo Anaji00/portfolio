@@ -1,0 +1,59 @@
+# Domain Coverage Gap Closure — Implementation Walkthrough
+
+## Summary of Completed Work
+All 5 items of **PART 1 — Close existing domain coverage gaps** have been fully implemented, audited, and verified with **261 passing tests (0 failures)** across 25 test suites.
+
+---
+
+## 1. Implementations & Audits Delivered
+
+### 1.1 — Primary-Source Social & OSINT Collector (`collector-social`)
+- **New Service**: Built [`services/collector-social/main.py`](file:///c:/Users/najia/sentinel/services/collector-social/main.py).
+- **Curated Ingestion Sources**:
+  - **Telegram Public Channels**: High-signal geopolitical and maritime channels (`OSINTtechnical`, `BellumActaNews`, `MaritimeExecutive`, `IntelDoge`, `ClashReport`, `MiddleEastEye`, `warmonitors`).
+  - **Reddit Subreddits**: Financial, options flow, and geopolitical communities (`r/geopolitics`, `r/wallstreetbets`, `r/options`, `r/worldnews`, `r/stocks`, `r/energy`, `r/commodities`).
+  - **X/Twitter Breaking Feeds**: Curated breaking financial and geopolitical squawk handles.
+- **Epistemic Differentiation**:
+  - Emits `RawEvent` with `source_type: "primary_social"` to `Topics.RAW_SOCIAL` (`events.raw.social`).
+  - Assigned calibrated baseline reliability ($\sim 0.65$) vs wire feeds ($\sim 0.90\text{--}0.95$), preserving provenance tags in `NormalizedEvent` (`type: EventType.SOCIAL_SIGNAL`).
+- **Enrichment Integration**: Subscribed in [`services/enrichment/main.py`](file:///c:/Users/najia/sentinel/services/enrichment/main.py) and processed by [`NewsEnricher`](file:///c:/Users/najia/sentinel/services/enrichment/enrichers/news.py).
+
+### 1.2 — Multi-Chain On-Chain Whale Tracking Activation
+- **Live Out-of-the-Box**: Configured resilient fallback public RPC endpoints for **Ethereum** (`wss://ethereum-rpc.publicnode.com`), **Arbitrum** (`wss://arbitrum-one-rpc.publicnode.com`), and **Base** (`wss://base-rpc.publicnode.com`) in [`services/collector-crypto/main.py`](file:///c:/Users/najia/sentinel/services/collector-crypto/main.py).
+- **Expanded Token Universe**:
+  - **Ethereum**: USDT, USDC, DAI, WBTC, WETH
+  - **Arbitrum**: USDT, USDC, ARB, WBTC, WETH
+  - **Base**: USDC, USDbC, cbBTC, WETH
+- Multi-chain transfer logs parsed and emitted to `Topics.RAW_CRYPTO` with chain and USD notional attributes.
+
+### 1.3 — Cross-Exchange Crypto Divergence Engine
+- **Multi-Venue Polling**: Implemented `stream_cross_exchange_divergence()` in [`services/collector-crypto/main.py`](file:///c:/Users/najia/sentinel/services/collector-crypto/main.py) comparing perpetual funding rates and mark prices across **Binance**, **Bybit**, and **Kraken/Coinbase**.
+- **Basis & Funding Arbitrage Signals**: Emits `CROSS_EXCHANGE_FUNDING_DIVERGENCE` raw events when funding rate spreads exceed 3 bps or price basis exceeds 35 bps.
+
+### 1.4 — Statistical Insider Transaction Clustering
+- **Rolling Window Aggregation**: Implemented `_process_insider_form4()` in [`services/agents/quant_trading_engine.py`](file:///c:/Users/najia/sentinel/services/agents/quant_trading_engine.py) maintaining a rolling 14-day history of SEC Form 4 filings in Redis (`sentinel:insider:trades:{ticker}`).
+- **Cluster Gate & Z-Score**:
+  - Detects when $\ge 2$ distinct C-suite executives / insiders purchase within the rolling window and net buy volume $\ge \$250,000$.
+  - Calculates statistical cluster Z-score:
+    $$Z = \min\left(4.5, \sqrt{N_{\text{insiders}}} \times \log_{10}\left(1 + \frac{\text{Net Buy USD}}{100,000}\right)\right)$$
+  - Emits first-class `INSIDER_CLUSTER` event to `Topics.INSIDER_CLUSTERS`, publishes quant bulletins, and records active cluster state in Redis (`sentinel:insider:clusters:{ticker}`).
+
+### 1.5 — Aviation & Maritime Coverage Boundaries Audit Findings
+- **Aviation (ADS-B)**:
+  - **Source**: OpenSky Network REST API.
+  - **Findings**: OpenSky is an open academic sensor network. It **does NOT** deliberately filter or block military/government aircraft transponders (unlike commercial services). Any military aircraft with Mode S/ADS-B enabled is reported. Military flights operating with transponders off ("dark flights") are undetected via direct ADS-B and rely on sensor multilateration (MLAT) or downstream gap detection.
+  - **Spatial Reach**: Bounded to 12 defined geographic watch zones (`WATCH_ZONES`) polled every 30s–60s due to API rate limits.
+- **Maritime (AIS)**:
+  - **Source**: AISStream.io WebSocket.
+  - **Findings**: AISStream is a **terrestrial-based** crowd-sourced VHF antenna network. Line-of-sight range is strictly **20 to 50 nautical miles** from coastlines. Vessels in deep ocean "blue water" transit are blind to terrestrial receivers. Genuine global blue-water coverage requires Satellite-AIS (S-AIS) commercial feeds.
+  - **Mitigation**: Sentinel concentrates watch zones on critical coastal straits and maritime chokepoints (Hormuz, Malacca, Bab-el-Mandeb, Suez, Taiwan Strait, Red Sea) where terrestrial antenna density is robust.
+
+---
+
+## 2. Test Verification
+
+```
+====================== 261 passed, 16 warnings in 38.43s ======================
+```
+- Authored [`tests/test_domain_coverage_gaps.py`](file:///c:/Users/najia/sentinel/tests/test_domain_coverage_gaps.py) (3/3 PASSED).
+- Full regression passed: **261 passed, 0 failures** across all 25 test suites.
